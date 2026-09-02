@@ -26,6 +26,18 @@ export const mockBusinesses: Business[] = [
       { id: 'p3', name: 'Corte Masculino', price: 35.00 },
     ],
   },
+  {
+    id: '3',
+    name: 'Farmácia Cura Tudo',
+    category: 'Farmácia',
+    description: 'Onde você encontra tudo que precisa.',
+    rating: 2.9,
+    distance: 0.8,
+    openingHours: 'Ter-Sáb: 8h às 20h',
+    products: [
+      { id: 'p4', name: 'Dipirona', price: 5.00 },
+    ],
+  },
 ];
 
 export const categories: string[] = ['Padaria', 'Salão', 'Oficina', 'Mercado', 'Farmácia'];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Text, TextInput } from 'react-native';
+import { View, FlatList, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BusinessCard } from '../components/BusinessCard';
 import { colors, spacing, borderRadius } from '../theme/colors';
@@ -12,7 +12,7 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [search, setSearch] = useState('');
 
-  const filtered = mockBusinesses.filter(b => 
+  const filtered = mockBusinesses.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -29,14 +29,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         />
       </View>
 
+      <TouchableOpacity
+        style={{ backgroundColor: colors.primary, padding: 12, borderRadius: 8, margin: 16, alignItems: 'center' }}
+        onPress={() => navigation.navigate('Register')}
+        accessibilityRole="button"
+        accessibilityLabel="Botão para cadastrar novo comerciante"
+      >
+        <Text style={{ color: colors.white, fontWeight: 'bold' }}>Cadastrar meu Comércio</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <BusinessCard 
-            business={item} 
-            onPress={() => navigation.navigate('Details', { businessId: item.id })} 
+          <BusinessCard
+            business={item}
+            onPress={() => navigation.navigate('Details', { businessId: item.id })}
           />
         )}
         ListEmptyComponent={
