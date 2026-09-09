@@ -1,72 +1,170 @@
-import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, FlatList, StyleSheet, Text, TextInput, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Header } from '../components/Header';
 import { BusinessCard } from '../components/BusinessCard';
-import { colors, spacing, borderRadius } from '../theme/colors';
-import { mockBusinesses } from '../data/mockData';
+import { CategoryChip } from '../components/CategoryChip';
+import { colors, spacing } from '../theme/colors';
+import { mockBusinesses, categories } from '../data/mockData';
+import { Category, Business } from '../types';
+import { apiService } from '../services/api';
+import { storageService } from '../services/storage';
 
 interface HomeScreenProps {
   navigation: any;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  // --- ESTADOS ---
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | 'Todos'>('Todos');
+  
+  // Estados da API e Offline-First
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = mockBusinesses.filter(b =>
-    b.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Estado dos Favoritos
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
+  // --- EFEITOS (Carregamento Inicial) ---
+  useEffect(() => {
+    loadData();
+    loadFavorites();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // 1. Tenta buscar da API
+      const remoteData = await apiService.fetchBusinesses();
+      setBusinesses(remoteData);
+      
+      // 2. Se der certo, salva no cache para a próxima vez
+      await storageService.saveCache(remoteData);
+    } catch (err) {
+      // 3. Se falhar (sem internet), avisa o usuário
+      setError('Você está offline. Mostrando dados salvos.');
+      
+      // 4. Carrega o que tiver no cache
+      const cachedData = await storageService.getCache();
+      if (cachedData.length > 0) {
+        setBusinesses(cachedData);
+      } else {
+        // Fallback para o mock se não houver cache e a API falhar
+        setBusinesses(mockBusinesses); 
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFavorites = async () => {
+    const ids = await storageService.getFavorites();
+    setFavoriteIds(ids);
+  };
+
+  // --- LÓGICA DE FILTRAGEM (useMemo para performance) ---
+  const filteredBusinesses = useMemo(() => {
+    return businesses.filter((business) => {
+      const matchesSearch = business.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = selectedCategory === 'Todos' || business.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [businesses, search, selectedCategory]);
+
+  // --- HANDLERS ---
+  const handleToggleFavorite = async (id: string) => {
+    const newIds = await storageService.toggleFavorite(id);
+    setFavoriteIds(newIds);
+  };
+
+  // --- RENDERIZAÇÃO ---
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Vitrine do Bairro</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="🔍 Buscar no bairro..."
-          placeholderTextColor={colors.textLight}
-          value={search}
-          onChangeText={setSearch}
+      <Header searchValue={search} onSearchChange={setSearch} />
+      
+      <View style={styles.categoriesContainer}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={['Todos', ...categories]}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <CategoryChip
+              label={item as Category | 'Todos'}
+              selected={selectedCategory === item}
+              onPress={() => setSelectedCategory(item as Category | 'Todos')}
+            />
+          )}
+          contentContainerStyle={styles.categoriesList}
         />
       </View>
 
-      <TouchableOpacity
-        style={{ backgroundColor: colors.primary, padding: 12, borderRadius: 8, margin: 16, alignItems: 'center' }}
-        onPress={() => navigation.navigate('Register')}
-        accessibilityRole="button"
-        accessibilityLabel="Botão para cadastrar novo comerciante"
-      >
-        <Text style={{ color: colors.white, fontWeight: 'bold' }}>Cadastrar meu Comércio</Text>
-      </TouchableOpacity>
+      {/* Indicador de Loading */}
+      {loading && (
+        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+      )}
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <BusinessCard
-            business={item}
-            onPress={() => navigation.navigate('Details', { businessId: item.id })}
-          />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum comerciante encontrado 😕</Text>
-        }
-      />
+      {/* Banner de Erro Offline */}
+      {error && !loading && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>⚠️ {error}</Text>
+          <TouchableOpacity onPress={loadData}>
+            <Text style={styles.retryText}>Tentar de novo</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Lista de Comerciantes */}
+      {!loading && (
+        <FlatList
+          data={filteredBusinesses}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }) => (
+            <BusinessCard
+              business={item}
+              onPress={() => navigation.navigate('Details', { businessId: item.id })}
+              isFavorite={favoriteIds.includes(item.id)}
+              onToggleFavorite={() => handleToggleFavorite(item.id)}
+            />
+          )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nenhum comerciante encontrado </Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  header: { backgroundColor: colors.secondary, padding: spacing.md, paddingTop: spacing.lg },
-  title: { fontSize: 24, fontWeight: '700', color: colors.white, marginBottom: spacing.md },
-  searchInput: {
+  categoriesContainer: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.full,
-    padding: spacing.md,
-    fontSize: 16,
-    color: colors.text,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
+  categoriesList: { paddingHorizontal: spacing.md },
   list: { padding: spacing.md },
-  emptyText: { textAlign: 'center', marginTop: 40, color: colors.textLight, fontSize: 16 },
+  loader: { marginTop: 50 },
+  errorBanner: {
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    margin: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  errorText: { color: '#E65100', fontWeight: '600', flex: 1, fontSize: 14 },
+  retryText: { color: colors.primary, fontWeight: 'bold', fontSize: 14 },
+  emptyContainer: { padding: spacing.xl, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: colors.textLight },
 });

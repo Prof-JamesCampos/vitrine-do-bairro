@@ -48,7 +48,7 @@ export const RegisterBusinessScreen: React.FC = () => {
             placeholder="Ex: Padaria do João"
             placeholderTextColor={colors.textLight}
             accessibilityLabel={`Campo nome do estabelecimento. ${errors.name ? `Erro: ${errors.name}` : ''}`}
-            //accessibilityState={{ invalid: !!errors.name }}
+            //accessibilityState={{ invalid: !!errors.name } as any }
           />
           {errors.name && <Text style={styles.errorText} accessibilityRole="alert">⚠️ {errors.name}</Text>}
         </View>

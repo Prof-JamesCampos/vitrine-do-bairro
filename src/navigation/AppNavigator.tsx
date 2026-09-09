@@ -8,6 +8,8 @@ import { DetailsScreen } from '../screens/DetailsScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { RegisterBusinessScreen } from '../screens/RegisterBusinessScreen';
 import { colors } from '../theme/colors';
+import { FavoriteScreen } from '../screens/FavoriteScreen';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -69,7 +71,7 @@ export const AppNavigator: React.FC = () => {
       >
         <Tab.Screen name="Início" component={HomeStack} options={{ tabBarLabel: 'Início' }} />
         <Tab.Screen name="Mapa" component={MapScreen} options={{ tabBarLabel: 'Mapa' }} />
-        <Tab.Screen name="Favoritos" component={MapScreen} options={{ tabBarLabel: 'Favoritos' }} />
+        <Tab.Screen name="Favoritos" component={FavoriteScreen} options={{ tabBarLabel: 'Favoritos' }} /> 
         <Tab.Screen name="Perfil" component={MapScreen} options={{ tabBarLabel: 'Perfil' }} />
       </Tab.Navigator>
     </NavigationContainer>
