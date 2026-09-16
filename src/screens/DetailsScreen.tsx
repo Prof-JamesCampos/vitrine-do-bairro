@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../theme/colors';
+import { styles } from './DetailsScreen.styles';
 import { mockBusinesses } from '../data/mockData';
 
 export const DetailsScreen: React.FC<any> = ({ route }) => {
@@ -21,9 +21,3 @@ export const DetailsScreen: React.FC<any> = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md },
-  name: { fontSize: 24, fontWeight: '700', color: colors.text },
-  desc: { fontSize: 16, color: colors.textLight, marginTop: spacing.sm },
-});

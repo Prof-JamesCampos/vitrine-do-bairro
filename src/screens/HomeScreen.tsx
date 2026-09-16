@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, FlatList, StyleSheet, Text, TextInput, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, FlatList, Text, TextInput, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../components/Header';
 import { BusinessCard } from '../components/BusinessCard';
 import { CategoryChip } from '../components/CategoryChip';
-import { colors, spacing } from '../theme/colors';
+import { colors } from '../theme/colors';
 import { mockBusinesses, categories } from '../data/mockData';
 import { Category, Business } from '../types';
 import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
+import { styles } from './HomeScreen.styles';
 
 interface HomeScreenProps {
   navigation: any;
@@ -76,10 +77,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [businesses, search, selectedCategory]);
 
   // --- HANDLERS ---
+  //const handleToggleFavorite = async (id: string) => {
+    //const newIds = await storageService.toggleFavorite(id);
+    //setFavoriteIds(newIds);
+  //};
   const handleToggleFavorite = async (id: string) => {
+  try {
     const newIds = await storageService.toggleFavorite(id);
-    setFavoriteIds(newIds);
-  };
+    setFavoriteIds(newIds); // <--- Isso força o coração a mudar de cor
+  } catch (error) {
+    console.error("Erro ao salvar favorito:", error);
+  }
+};
 
   // --- RENDERIZAÇÃO ---
   return (
@@ -143,28 +152,3 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  categoriesContainer: {
-    backgroundColor: colors.white,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  categoriesList: { paddingHorizontal: spacing.md },
-  list: { padding: spacing.md },
-  loader: { marginTop: 50 },
-  errorBanner: {
-    backgroundColor: '#FFF3E0',
-    padding: 12,
-    margin: 16,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  errorText: { color: '#E65100', fontWeight: '600', flex: 1, fontSize: 14 },
-  retryText: { color: colors.primary, fontWeight: 'bold', fontSize: 14 },
-  emptyContainer: { padding: spacing.xl, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: colors.textLight },
-});

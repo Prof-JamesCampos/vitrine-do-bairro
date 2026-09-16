@@ -16,14 +16,14 @@ export const storageService = {
   },
 
   async toggleFavorite(id: string): Promise<string[]> {
-    const favorites = await storageService.getFavorites();
+    const favorites = await this.getFavorites();
     const exists = favorites.includes(id);
     
     const newFavorites = exists 
       ? favorites.filter(favId => favId !== id) 
       : [...favorites, id];
       
-    await storageService.saveFavorites(newFavorites);
+    await this.saveFavorites(newFavorites);
     return newFavorites;
   },
 
