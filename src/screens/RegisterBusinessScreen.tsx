@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme/colors';
 import { useFormValidation } from '../hooks/useFormValidation';
-import { styles } from './RegisterBusinessScreen.style';
+import { styles } from './RegisterBusinessScreen.styles';
 
 export const RegisterBusinessScreen: React.FC = () => {
   const [name, setName] = useState('');

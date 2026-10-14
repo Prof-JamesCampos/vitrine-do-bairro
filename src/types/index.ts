@@ -11,6 +11,9 @@ export interface Business {
   name: string;
   category: Category;
   description: string;
+  adress?: string;
+  phone?: string;
+  whatsapp?: string;
   rating: number;
   distance: number; 
   openingHours: string;

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BusinessCard } from '../components/BusinessCard';
 import { storageService } from '../services/storage';
 import { mockBusinesses } from '../data/mockData';
-import { styles } from './FavoriteScreen.style';
+import { styles } from './FavoriteScreen.styles';
 
 export const FavoriteScreen: React.FC<any> = ({ navigation }) => {
   const [favorites, setFavorites] = useState<string[]>([]);
