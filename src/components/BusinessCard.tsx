@@ -12,12 +12,7 @@ interface BusinessCardProps {
 }
 
 export const BusinessCard: React.FC<BusinessCardProps> = ({ 
-  business, 
-  onPress, 
-  isFavorite = false, 
-  onToggleFavorite 
-}) => {
-  return (
+  business, onPress, isFavorite = false, onToggleFavorite }) => (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.content}>
         
@@ -53,5 +48,4 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
       </View>
     </TouchableOpacity>
   );
-};
 
